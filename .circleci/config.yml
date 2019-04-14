@@ -1,0 +1,21 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - dc-{{ checksum "go.mod" }}-{{ checksum "go.sum" }}
+            - dc-{{ checksum "go.mod" }}-
+            - dc-
+
+      - run: docker-compose run --rm test
+      - run: bash <(curl -s https://codecov.io/bash)
+      - run: sudo chown -R circleci:circleci .dockerbuild
+
+      - save_cache:
+          key: dc-{{ checksum "go.mod" }}-{{ checksum "go.sum" }}
+          paths:
+            - .dockerbuild/

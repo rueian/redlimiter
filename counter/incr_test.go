@@ -10,7 +10,7 @@ import (
 )
 
 func connect() *redis.Client {
-	return redis.NewClient(&redis.Options{Addr: "localhost:6379"})
+	return redis.NewClient(&redis.Options{Addr: "redis:6379"})
 }
 
 func TestLuaIncrementer(t *testing.T) {

@@ -1,0 +1,15 @@
+version: '3.2'
+
+services:
+  test:
+    image: golang:1.12
+    command: ["bash", "-c", "go test -v -coverprofile=coverage.txt -covermode=atomic ./..."]
+    working_dir: /app
+    volumes:
+      - .dockerbuild:/go
+      - .:/app
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:5-alpine
