@@ -2,7 +2,6 @@ package counter
 
 import (
 	"sync"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -31,39 +30,36 @@ func BenchmarkTxIncrementer(b *testing.B) {
 
 func testIncrementer(t *testing.T, key string, incrementer Incrementer) {
 	var expireSec int64 = 1
-	var counter int64 = 0
-
 	var concurrent = 4
 	var rounds = 100
 
+	incr := func() int64 {
+		v, err := incrementer.Incr(key, expireSec)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+
 	wg := sync.WaitGroup{}
-	wg.Add(concurrent)
 	for c := 0; c < concurrent; c++ {
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			for i := 0; i < rounds; i++ {
-				v, err := incrementer.Incr(key, expireSec)
-				if err != nil {
-					panic(err)
-				}
-				atomic.StoreInt64(&counter, v)
+				incr()
 			}
-			wg.Done()
 		}()
 	}
 	wg.Wait()
 
-	if counter != int64(concurrent*rounds) {
-		t.Errorf("counter should be %d, but got %d", concurrent*rounds, counter)
+	if counter := incr(); counter != int64(concurrent*rounds)+1 {
+		t.Errorf("counter should be %d, but got %d", concurrent*rounds+1, counter)
 	}
 
 	time.Sleep(time.Duration(expireSec) * time.Second)
 
-	v, err := incrementer.Incr(key, expireSec)
-	if err != nil {
-		panic(err)
-	}
-
-	if v != 1 {
+	if counter := incr(); counter != 1 {
 		t.Errorf("counter is not exipred after %d seconds", expireSec)
 	}
 }
