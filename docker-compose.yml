@@ -1,7 +1,7 @@
 version: '3.2'
 
 services:
-  test:
+  test: &base
     image: golang:1.12
     command: ["bash", "-c", "go test -v -coverprofile=coverage.txt -covermode=atomic ./..."]
     working_dir: /app
@@ -10,6 +10,10 @@ services:
       - .:/app
     depends_on:
       - redis
+
+  bench:
+    <<: *base
+    command: ["bash", "-c", "go test -bench=.  ./..."]
 
   redis:
     image: redis:5-alpine

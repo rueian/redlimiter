@@ -31,3 +31,25 @@ func main() {
 	}
 }
 ```
+
+### LuaIncrementer
+
+Executing a lua script which issues a `INCR` command and a conditional `EXPIRE` command on a key atomically on redis.
+
+### TxIncrementer
+
+Issuing `MULTI` `SET EX NX` `INCR` `EXEC` commands on a key atomically on redis.
+
+### Benchmark
+
+```bash
+▶ docker-compose run --rm bench
+Starting redlimiter_redis_1 ... done
+goos: linux
+goarch: amd64
+pkg: github.com/rueian/redlimiter/counter
+BenchmarkLuaIncrementer-6   	    5000	    279119 ns/op
+BenchmarkTxIncrementer-6    	    5000	    307964 ns/op
+PASS
+ok  	github.com/rueian/redlimiter/counter	5.138s
+```
