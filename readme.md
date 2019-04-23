@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	client := redis.NewUniversalClient(&redis.Options{Addr: "localhost:6379"})
+	client := redis.NewUniversalClient(&redis.UniversalOptions{Addrs: []string{"redis:6379"}})
 	
 	incrementer := counter.NewLuaIncrementer(client) // or counter.NewTxIncrementer(client)
 	count, err := incrementer.Incr("client_ip", 1) // expire in 1 sec
